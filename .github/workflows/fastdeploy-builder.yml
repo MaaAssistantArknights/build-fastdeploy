@@ -9,9 +9,9 @@ on:
     branches: [ master ]
 
 env:
-  OPENCV_REF: 4.5.3
-  FASTDEPLOY_VER: 1.0.0
-  FASTDEPLOY_REF: 49061bfb1c6d235ced7489f7d5c02930bb3a2107
+  OPENCV_VER: 4.5.3
+  FASTDEPLOY_VER: g22325d23 
+  FASTDEPLOY_REF: 22325d23ed1543b7034f3214d7f8be3ff6a1c8db
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -55,8 +55,8 @@ jobs:
       - name: Download OpenCV
         uses: robinraju/release-downloader@v1.6
         with:
-          repository: "aa889788/build-opencv"
-          tag: ${{ env.OPENCV_REF }}
+          repository: "MaaAssistantArknights/build-opencv"
+          tag: ${{ env.OPENCV_VER }}
           fileName: OpenCV-${{ runner.os }}.tar.gz
 
       - name: Extract OpenCV
