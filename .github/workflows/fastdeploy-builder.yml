@@ -92,6 +92,13 @@ jobs:
               -DCMAKE_INSTALL_RPATH='$ORIGIN/:$ORIGIN/../third_libs/install/onnxruntime/lib:$ORIGIN/../third_libs/install/paddle2onnx/lib' \
               ..
 
+      - name: Extra configuration for Windows
+        if: runner.os == 'Windows'
+        run: |
+            cd ${GITHUB_WORKSPACE}/FastDeploy/build
+            cmake .. \
+              -DCMAKE_CXX_COMPILER_LAUNCHER:FILEPATH="${{ env.ccache_symlinks_path }}"
+
       - name: Build FastDeploy
         run: |
             cd ${GITHUB_WORKSPACE}/FastDeploy/build
@@ -126,12 +133,21 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
-          path: ${GITHUB_WORKSPACE}/release
+          path: download
+
+      - name: Move files
+        run: |
+            cd ${GITHUB_WORKSPACE}
+            mkdir release
+            mv download/*/* ${GITHUB_WORKSPACE}/release/
+            cd ${GITHUB_WORKSPACE}/release
+            sha256sum --tag * > ${GITHUB_WORKSPACE}/hashes.txt
 
       - name: Upload Release
         uses: softprops/action-gh-release@v1
         with:
+          body_path: hashes.txt
           tag_name: ${{ env.FASTDEPLOY_VER }}
           files: |
-            ${GITHUB_WORKSPACE}/release/*/*
+            release/*
 
