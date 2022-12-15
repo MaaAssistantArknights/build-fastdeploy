@@ -20,7 +20,12 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos, ubuntu, windows]
+        os: [ubuntu, windows]
+        include:
+          - os: macos
+            arch: arm64
+          - os: macos
+            arch: x86_64
 
     defaults:
       run:
@@ -52,17 +57,23 @@ jobs:
         if: runner.os == 'Windows'
         uses: lukka/get-cmake@v3.24.3
 
+      - name: Setup package suffix
+        run: |
+          PKG_SUFFIX=${{ runner.os }}
+          [[ ${{ matrix.os }} = "macos" ]] && PKG_SUFFIX=$PKG_SUFFIX-${{ matrix.arch }}
+          echo "PKG_SUFFIX=${PKG_SUFFIX}" >> $GITHUB_ENV
+
       - name: Download OpenCV
         uses: robinraju/release-downloader@v1.6
         with:
           repository: "MaaAssistantArknights/build-opencv"
           tag: ${{ env.OPENCV_VER }}
-          fileName: OpenCV-${{ runner.os }}.tar.gz
+          fileName: OpenCV-${{ env.PKG_SUFFIX }}.tar.gz
 
       - name: Extract OpenCV
         run: |
           cd ${GITHUB_WORKSPACE}
-          tar -zxvf OpenCV-${{ runner.os }}.tar.gz
+          tar -zxvf OpenCV-${{ env.PKG_SUFFIX }}.tar.gz
 
       - name: Clone FastDeploy
         uses: actions/checkout@v3
@@ -99,6 +110,13 @@ jobs:
             cmake .. \
               -DCMAKE_CXX_COMPILER_LAUNCHER:FILEPATH="${{ env.ccache_symlinks_path }}"
 
+      - name: Extra configuration for macOS
+        if: runner.os == 'macOS'
+        run: |
+            cd ${GITHUB_WORKSPACE}/FastDeploy/build
+            cmake .. \
+              -DCMAKE_OSX_ARCHITECTURES="${{ matrix.arch }}"
+
       - name: Build FastDeploy
         run: |
             cd ${GITHUB_WORKSPACE}/FastDeploy/build
@@ -112,14 +130,14 @@ jobs:
       - name: Package FastDeploy
         run: |
             cd ${GITHUB_WORKSPACE}/build
-            tar -czvf FastDeploy-${{ runner.os }}.tar.gz fastdeploy
+            tar -czvf FastDeploy-${{ env.PKG_SUFFIX }}.tar.gz fastdeploy
 
 
       - name: Upload FastDeploy
         uses: actions/upload-artifact@v3
         with:
-          name: fastdeploy-${{ runner.os }}
-          path: build/FastDeploy-${{ runner.os }}.tar.gz
+          name: fastdeploy-${{ env.PKG_SUFFIX }}
+          path: build/FastDeploy-${{ env.PKG_SUFFIX }}.tar.gz
 
 
   upload-release:
