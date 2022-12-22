@@ -10,8 +10,8 @@ on:
 
 env:
   OPENCV_VER: 4.5.3
-  FASTDEPLOY_VER: g22325d23 
-  FASTDEPLOY_REF: 22325d23ed1543b7034f3214d7f8be3ff6a1c8db
+  FASTDEPLOY_VER: gac255b8a
+  FASTDEPLOY_REF: ac255b8ab8c888fa96299715e2f9802cf3d722c0
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -115,7 +115,8 @@ jobs:
         run: |
             cd ${GITHUB_WORKSPACE}/FastDeploy/build
             cmake .. \
-              -DCMAKE_OSX_ARCHITECTURES="${{ matrix.arch }}"
+              -DCMAKE_OSX_ARCHITECTURES="${{ matrix.arch }}" \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
 
       - name: Build FastDeploy
         run: |
