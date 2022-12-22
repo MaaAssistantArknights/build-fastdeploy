@@ -37,6 +37,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
+      
+      - name: Setup macOS Environment
+        if: runner.os == 'macOS'
+        run: |
+          brew unlink python
+          brew link --overwrite python
 
       - name: Setup ccache
         uses: Chocobo1/setup-ccache-action@v1
